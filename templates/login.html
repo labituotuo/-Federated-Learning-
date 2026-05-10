@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联邦学习系统 - 登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #5B8C5A;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #000;
+            font-size: 1.1em;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .role-btn:hover {
+            border-color: #5B8C5A;
+            transform: translateY(-2px);
+        }
+
+        .role-btn.active {
+            position: relative;
+            border-color: #5B8C5A;
+            color: #1a4017;
+        }
+
+        .role-btn.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 15px;
+            z-index: 0;
+        }
+
+        .role-btn.active > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .role-btn .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .role-btn .title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #5B8C5A;
+        }
+
+        .login-btn {
+            position: relative;
+            width: 100%;
+            padding: 15px;
+            color: #1a4017;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 10px;
+            z-index: 0;
+        }
+
+        .login-btn > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #000;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🔐 系统登录</h1>
+            <p>联邦学习糖尿病预测系统</p>
+        </div>
+
+        <div class="error-message" id="errorMsg"></div>
+
+        <div class="role-selector">
+            <div class="role-btn active" onclick="selectRole('admin', event)">
+                <div class="icon">👨‍💼</div>
+                <div class="title">管理人员</div>
+            </div>
+            <div class="role-btn" onclick="selectRole('user', event)">
+                <div class="icon">👤</div>
+                <div class="title">普通用户</div>
+            </div>
+        </div>
+
+        <!-- 登录/注册切换 -->
+        <div class="auth-tabs" style="display: flex; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+            <button class="auth-tab active" onclick="switchAuthMode('login')" style="flex: 1; padding: 10px; background: none; border: none; cursor: pointer; font-weight: bold; color: #5B8C5A;">登录</button>
+            <button class="auth-tab" onclick="switchAuthMode('register')" style="flex: 1; padding: 10px; background: none; border: none; cursor: pointer; font-weight: bold; color: #000;">注册</button>
+        </div>
+
+        <!-- 登录表单 -->
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="loginUsername">用户名</label>
+                <input type="text" id="loginUsername" placeholder="请输入用户名" required>
+            </div>
+
+            <div class="form-group">
+                <label for="loginPassword">密码</label>
+                <input type="password" id="loginPassword" placeholder="请输入密码" required>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">登录</button>
+        </form>
+
+        <!-- 注册表单 -->
+        <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
+            <div class="form-group">
+                <label for="registerUsername">用户名</label>
+                <input type="text" id="registerUsername" placeholder="请输入用户名" required>
+            </div>
+
+            <div class="form-group">
+                <label for="registerPassword">密码</label>
+                <input type="password" id="registerPassword" placeholder="请输入密码" required>
+            </div>
+
+            <div class="form-group">
+                <label for="registerConfirmPassword">确认密码</label>
+                <input type="password" id="registerConfirmPassword" placeholder="请再次输入密码" required>
+            </div>
+
+            <button type="submit" class="login-btn" id="registerBtn">注册</button>
+        </form>
+
+        <div class="footer">
+            <p>请选择角色并输入凭据登录</p>
+        </div>
+    </div>
+
+    <script>
+        let selectedRole = 'admin';
+
+        // 默认账号密码提示
+        const defaultCredentials = {
+            admin: { username: 'admin', password: 'admin123' },
+            user: { username: 'user', password: 'user123' }
+        };
+
+        function selectRole(role, event) {
+            selectedRole = role;
+            
+            // 更新按钮样式
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // 清空输入框
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            hideError();
+        }
+
+        function showError(message, type = 'error') {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = message;
+            errorMsg.classList.add('show');
+            
+            // 根据类型设置不同样式
+            if (type === 'success') {
+                errorMsg.style.background = '#e8f5e8';
+                errorMsg.style.color = '#2e7d32';
+            } else {
+                errorMsg.style.background = '#fee';
+                errorMsg.style.color = '#c33';
+            }
+        }
+
+        function hideError() {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.classList.remove('show');
+        }
+
+        function switchAuthMode(mode) {
+            // 切换标签样式
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.color = '#000';
+            });
+            event.currentTarget.classList.add('active');
+            event.currentTarget.style.color = '#5B8C5A';
+
+            // 切换表单显示
+            if (mode === 'login') {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+                document.querySelector('.footer').textContent = '请选择角色并输入凭据登录';
+            } else {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+                document.querySelector('.footer').textContent = '注册新账户';
+            }
+            hideError();
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+
+            // 禁用按钮防止重复提交
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            hideError();
+
+            // 调用后端API进行验证
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    role: selectedRole
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 登录成功，跳转到对应页面
+                    if (selectedRole === 'admin') {
+                        window.location.href = '/main';
+                    } else {
+                        window.location.href = '/predict';
+                    }
+                } else {
+                    // 登录失败
+                    showError(data.message || '用户名或密码错误');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = '登录';
+                }
+            })
+            .catch(error => {
+                console.error('登录错误:', error);
+                showError('网络错误，请重试');
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录';
+            });
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+            const confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
+            const registerBtn = document.getElementById('registerBtn');
+
+            // 验证输入
+            if (!username || !password) {
+                showError('用户名和密码不能为空');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('两次输入的密码不一致');
+                return;
+            }
+
+            // 禁用按钮防止重复提交
+            registerBtn.disabled = true;
+            registerBtn.textContent = '注册中...';
+            hideError();
+
+            // 调用后端API进行注册
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    role: selectedRole
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 注册成功，切换到登录界面
+                    showError('注册成功，请登录', 'success');
+                    switchAuthMode('login');
+                    document.getElementById('loginUsername').value = username;
+                } else {
+                    // 注册失败
+                    showError(data.message || '注册失败');
+                }
+            })
+            .catch(error => {
+                console.error('注册错误:', error);
+                showError('网络错误，请重试');
+            })
+            .finally(() => {
+                registerBtn.disabled = false;
+                registerBtn.textContent = '注册';
+            });
+        }
+
+        // 页面加载时不再自动跳转，让用户手动登录
+        window.onload = function() {
+            // 清除自动跳转逻辑，直接显示登录页面
+            console.log('登录页面已加载');
+        };
+    </script>
+</body>
+</html>

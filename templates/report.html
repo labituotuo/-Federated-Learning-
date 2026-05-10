@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能健康管理报告 - 糖尿病防控系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            color: #1a4017;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .navbar {
+            position: relative;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 15px;
+            z-index: 0;
+        }
+
+        .navbar > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .navbar a {
+            color: #1a4017;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .navbar a:hover, .navbar a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #5B8C5A;
+        }
+
+        .report-header h2 {
+            color: #5B8C5A;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .report-header .subtitle {
+            color: #000;
+            font-size: 1em;
+        }
+
+        .report-section {
+            margin-bottom: 30px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .report-section h3 {
+            color: #5B8C5A;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 4px solid #5B8C5A;
+        }
+
+        .report-section ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .report-section li {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.8;
+            color: #000;
+            font-size: 1em;
+        }
+
+        .report-section li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #5B8C5A;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #5B8C5A;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: #000;
+            font-size: 1.1em;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .ai-badge {
+            position: relative;
+            display: inline-block;
+            padding: 5px 15px;
+            color: #1a4017;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .ai-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 20px;
+            z-index: 0;
+        }
+
+        .ai-badge > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            .report-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 智能健康管理报告</h1>
+            <p>基于 DeepSeek AI 的个性化糖尿病防控建议</p>
+        </div>
+
+        <nav class="navbar">
+            <ul>
+                <li><a href="/profile" class="nav-link">用户画像</a></li>
+                <li><a href="/predict" class="nav-link">健康预测</a></li>
+                <li><a href="/report" class="nav-link active">健康报告</a></li>
+                <li><a href="#" onclick="logout()" style="background: rgba(255, 100, 100, 0.2);">退出登录</a></li>
+            </ul>
+        </nav>
+
+        <div id="reportContainer" class="report-card">
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>AI 健康管理专家正在分析您的健康数据...</p>
+                <p style="font-size: 0.9em; margin-top: 10px; color: #999;">请稍候，这可能需要 10-20 秒</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 加载预测数据并生成报告
+        function loadAndGenerateReport() {
+            // 从 localStorage 获取预测数据
+            const predictData = localStorage.getItem('lastPredictData');
+            
+            if (!predictData) {
+                document.getElementById('reportContainer').innerHTML = `
+                    <div class="error">
+                        <p>未找到预测数据，请先进行糖尿病风险预测。</p>
+                        <a href="/predict" style="display: inline-block; margin-top: 15px; color: #5B8C5A;">前往预测页面</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = JSON.parse(predictData);
+
+            // 调用 AI 报告生成 API
+            fetch('/api/health_report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data.inputData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    displayReport(result.report, data);
+                } else {
+                    document.getElementById('reportContainer').innerHTML = `
+                        <div class="error">
+                            <p>${result.message || 'AI 报告生成失败'}</p>
+                            <p style="margin-top: 10px;">请检查网络连接或稍后重试</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.getElementById('reportContainer').innerHTML = `
+                    <div class="error">
+                        <p>请求失败：${error.message}</p>
+                        <p style="margin-top: 10px;">请检查网络连接或稍后重试</p>
+                    </div>
+                `;
+            });
+        }
+
+        // 显示报告
+        function displayReport(reportText, data) {
+            const container = document.getElementById('reportContainer');
+            
+            // 解析报告文本
+            const sections = parseReportSections(reportText);
+            
+            let html = `
+                <div class="report-header">
+                    <div class="ai-badge">🤖 AI 智能生成</div>
+                    <h2>个性化健康管理方案</h2>
+                    <p class="subtitle">基于您的 ${data.inputData['年龄'] || ''} 岁健康指标定制</p>
+                </div>
+            `;
+            
+            sections.forEach((section, index) => {
+                html += `
+                    <div class="report-section" style="animation-delay: ${index * 0.1}s">
+                        <h3>${section.title}</h3>
+                        <ul>
+                            ${section.items.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 解析报告文本为结构化数据
+        function parseReportSections(text) {
+            const sections = [];
+            
+            // 匹配 【标题】格式
+            const sectionRegex = /【([^】]+)】/g;
+            const matches = [...text.matchAll(sectionRegex)];
+            
+            if (matches.length > 0) {
+                for (let i = 0; i < matches.length; i++) {
+                    const title = matches[i][1];
+                    const startIdx = matches[i].index + matches[i][0].length;
+                    const endIdx = i < matches.length - 1 ? matches[i + 1].index : text.length;
+                    
+                    const sectionText = text.substring(startIdx, endIdx).trim();
+                    const items = sectionText
+                        .split(/[-•·]\s*/)
+                        .filter(item => item.trim() && item.trim().length > 2);
+                    
+                    if (items.length > 0) {
+                        sections.push({ title, items });
+                    }
+                }
+            } else {
+                // 如果无法解析，显示原始文本
+                sections.push({
+                    title: 'AI 建议',
+                    items: text.split('\n').filter(line => line.trim())
+                });
+            }
+            
+            return sections;
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                fetch('/api/logout', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/login';
+                    }
+                })
+                .catch(error => {
+                    console.error('退出登录失败:', error);
+                    alert('退出登录失败，请重试');
+                });
+            }
+        }
+
+        // 页面加载时生成报告
+        window.onload = loadAndGenerateReport;
+    </script>
+</body>
+</html>

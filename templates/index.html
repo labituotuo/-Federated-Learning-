@@ -1,0 +1,2405 @@
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联邦学习数据展示系统</title>
+    <!-- 使用本地Chart.js文件确保稳定加载 -->
+    <script src="{{ url_for('static', filename='chart.min.js') }}"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            padding: 10px 20px;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .navbar a {
+            color: #1a4017;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .navbar a:hover, .navbar a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .header {
+            text-align: center;
+            color: #1a4017;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #5B8C5A;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-left: 4px solid #5B8C5A;
+            padding-left: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            position: relative;
+            color: #1a4017;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 200px;
+            word-wrap: break-word;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .stat-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .btn {
+            position: relative;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #1a4017;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 25px;
+            z-index: 0;
+        }
+
+        .btn > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .config-section {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .config-section label {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .config-section input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 150px;
+        }
+
+        .client-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .client-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #5B8C5A;
+            margin-bottom: 15px;
+        }
+
+        .client-card h3 {
+            color: #5B8C5A;
+            margin-bottom: 15px;
+        }
+
+        .client-info {
+            margin-bottom: 10px;
+        }
+
+        .client-info strong {
+            color: #000;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #000;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        /* 训练日志样式 - 终端风格 */
+        .log-container {
+            max-height: 600px;
+            overflow-y: auto;
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #30363d;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: #161b22;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 3px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        .log-item {
+            margin: 0;
+            padding: 0;
+            color: #c9d1d9;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .log-item .timestamp {
+            color: #8b949e;
+            margin-right: 8px;
+        }
+
+        .log-item .message {
+            font-family: inherit;
+            white-space: pre-wrap;
+        }
+
+        /* 终端色彩样式 */
+        .log-info {
+            color: #58a6ff;
+        }
+
+        .log-success {
+            color: #3fb950;
+        }
+
+        .log-warning {
+            color: #d29922;
+        }
+
+        .log-error {
+            color: #f85149;
+        }
+
+        .log-accent {
+            color: #a371f7;
+        }
+
+        /* 训练控制样式 */
+        .train-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-indicator.running {
+            background-color: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.stopped {
+            background-color: #9e9e9e;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+            }
+        }
+
+        /* 页面样式 */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 训练指标样式 */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-item {
+            position: relative;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #1a4017;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 10px;
+            z-index: 0;
+        }
+
+        .metric-item > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .metrics-summary h3 {
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        /* 控制面板样式 */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
+            outline: none;
+            border-color: #5B8C5A;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table th {
+            position: relative;
+            color: #1a4017;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            background: rgba(91, 140, 90, 0.3);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table .number {
+            text-align: right;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .data-table .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .data-table .status-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .data-table .status-warning {
+            background-color: #fff8e1;
+            color: #f57c00;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #000;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #5B8C5A;
+            color: #1a4017;
+            border-color: #5B8C5A;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination .active {
+            background: #5B8C5A;
+            color: #1a4017;
+            border-color: #5B8C5A;
+        }
+
+        /* 统计摘要卡片样式 */
+        .stats-grid .stat-card .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1a4017;
+            margin-bottom: 5px;
+        }
+
+        .stats-grid .stat-card .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            color: #1a4017;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <ul>
+                <li><a href="#" class="nav-link active" data-page="data-page">数据展示</a></li>
+                <li><a href="#" class="nav-link" data-page="train-page">训练日志</a></li>
+                <li><a href="#" class="nav-link" data-page="logs-page">日志汇总</a></li>
+                <li><a href="#" class="nav-link" data-page="shap-page">特征分析</a></li>
+                <li><a href="#" onclick="logout()" style="background: rgba(255, 100, 100, 0.2);">退出登录</a></li>
+            </ul>
+        </nav>
+
+        <div class="header">
+            <h1>🤖 联邦学习数据展示系统</h1>
+            <p>糖尿病数据集分析与客户端数据分布可视化</p>
+        </div>
+
+        <!-- 数据展示页面 -->
+        <div class="page active" id="data-page">
+            <!-- 数据集基本信息 -->
+            <div class="card" id="datasetCard">
+                <h2>📊 数据集基本信息</h2>
+                <div id="datasetInfo">
+                    <div class="loading">正在加载数据集信息...</div>
+                </div>
+            </div>
+
+            <!-- 生成客户端数据 -->
+            <div class="card">
+                <h2>⚙️ 生成客户端数据</h2>
+                <div class="config-section">
+                    <label for="numClients">客户端数量:</label>
+                    <input type="number" id="numClients" value="5" min="2" max="10">
+                    <button class="btn" onclick="generateData()">🚀 生成数据</button>
+                </div>
+                <div id="generateResult"></div>
+            </div>
+
+            <!-- 客户端数据分布 -->
+            <div class="card" id="clientsCard" style="display: none;">
+                <h2>📈 客户端数据分布</h2>
+                <div class="stats-grid" id="clientsStats"></div>
+                <canvas id="distributionChart"></canvas>
+            </div>
+
+            <!-- 客户端详细对比 -->
+            <div class="card" id="comparisonCard" style="display: none;">
+                <h2>🔍 客户端详细对比</h2>
+                <div class="client-grid" id="clientGrid"></div>
+            </div>
+        </div>
+
+        <!-- 训练日志页面 -->
+        <div class="page" id="train-page">
+            <!-- 训练配置 -->
+            <div class="card">
+                <h2>⚙️ 训练配置</h2>
+                <div class="control-panel">
+                    <!-- 算法选择 -->
+                    <div class="control-group">
+                        <label for="algorithmSelect">选择算法</label>
+                        <select id="algorithmSelect" onchange="updateAlgorithmUI()">
+                            <option value="FedAvg">FedAvg</option>
+                            <option value="FedProx">FedProx</option>
+                            <option value="SCAFFOLD">SCAFFOLD</option>
+                        </select>
+                    </div>
+
+                    <!-- FedProx 参数 -->
+                    <div class="control-group" id="muGroup" style="display: none;">
+                        <label for="muValue">FedProx μ值: <span id="muDisplay">0.01</span></label>
+                        <input type="range" id="muValue" min="0.001" max="0.1" step="0.001" value="0.01" 
+                               oninput="document.getElementById('muDisplay').textContent = this.value">
+                    </div>
+
+                    <!-- 隐私保护方式 -->
+                    <div class="control-group">
+                        <label for="privacySelect">隐私保护方式</label>
+                        <select id="privacySelect" onchange="togglePrivacyParams()">
+                            <option value="none">无</option>
+                            <option value="homomorphic">同态加密</option>
+                            <option value="differential">差分隐私</option>
+                        </select>
+                    </div>
+
+                    <!-- 差分隐私参数 -->
+                    <div id="privacyParams" style="display: none;">
+                        <div class="control-group">
+                            <label for="epsilon">隐私预算 ε (当前值: <span id="epsilonValue">10.0</span>)</label>
+                            <input type="range" id="epsilon" min="1" max="50" step="1" value="10" 
+                                   oninput="updateEpsilon(this.value)">
+                            <div class="range-labels">
+                                <span>1</span>
+                                <span>25</span>
+                                <span>50</span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="delta">失败概率 δ (当前值: <span id="deltaValue">5e-4</span>)</label>
+                            <input type="range" id="delta" min="0.000001" max="0.01" step="0.000001" value="0.0005" 
+                                   oninput="updateDelta(this.value)">
+                            <div class="range-labels">
+                                <span>1e-6</span>
+                                <span>5e-3</span>
+                                <span>0.01</span>
+                            </div>
+                        </div>
+                        <div class="control-group info-box">
+                            <strong>💡 参数说明：</strong>
+                            <ul>
+                                <li><strong>ε (隐私预算)</strong>：越小隐私保护越强，但模型精度损失越大，常用范围: 1-50，推荐值: 10-20</li>
+                                <li><strong>δ (失败概率)</strong>：越小越好，通常取数据集大小的倒数</li>
+                                <li><strong>建议设置</strong>：ε=10时隐私与精度较好平衡，ε=1时隐私强但精度损失大</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 训练控制 -->
+            <div class="card">
+                <h2>🎮 训练控制</h2>
+                <div class="train-controls">
+                    <div>
+                        <span class="status-indicator" id="trainStatusIndicator"></span>
+                        <span id="trainStatusText"></span>
+                    </div>
+                    <button class="btn" id="startTrainBtn" onclick="startTraining()">🚀 开始训练</button>
+                </div>
+                <div id="trainResult"></div>
+                <p id="statusMessage" style="margin-top: 15px; color: #000;"></p>
+            </div>
+
+            <!-- 训练日志 -->
+            <div class="card">
+                <h2>📊 训练日志</h2>
+                <div class="log-container" id="trainLogs">
+                    <div class="log-item"><span class="timestamp">[系统]</span><span class="log-info"> 欢迎使用 HTTP 联邦学习训练控制台</span></div>
+                    <div class="log-item"><span class="timestamp">[系统]</span><span class="log-info"> 点击"开始训练"启动联邦学习任务</span></div>
+                </div>
+            </div>
+
+            <!-- 训练指标 -->
+            <div class="card" id="metricsCard" style="display: none;">
+                <h2>🏆 训练指标</h2>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">准确率</div>
+                        <div class="metric-value" id="final-acc">--</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">精确率</div>
+                        <div class="metric-value" id="final-precision">--</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">查全率</div>
+                        <div class="metric-value" id="final-recall">--</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">F1分数</div>
+                        <div class="metric-value" id="final-f1">--</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">训练耗时</div>
+                        <div class="metric-value" id="final-time">--</div>
+                    </div>
+                </div>
+
+                <!-- 指标变化图表 -->
+                <div class="chart-container">
+                    <canvas id="trainingChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志汇总页面 -->
+        <div class="page" id="logs-page">
+            <div class="card">
+                <h2>📋 日志汇总</h2>
+                <p style="color: #000; margin-bottom: 20px;">显示最近20条模型训练日志及详细指标</p>
+                
+                <div id="logsSummaryContent">
+                    <div class="loading">正在加载日志汇总信息...</div>
+                </div>
+
+                <!-- 统计摘要 -->
+                <div class="stats-grid" id="logsSummaryStats" style="display: none; margin-top: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTrainCount">0</div>
+                        <div class="stat-label">总训练次数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgAccuracy">0</div>
+                        <div class="stat-label">平均准确率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgDuration">0</div>
+                        <div class="stat-label">平均耗时(秒)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="latestTrain">--</div>
+                        <div class="stat-label">最近训练</div>
+                    </div>
+                </div>
+
+                <!-- 训练日志表格 -->
+                <div class="table-container" id="logsTableContainer" style="display: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>训练时间</th>
+                                <th>算法</th>
+                                <th>隐私保护方式</th>
+                                <th>客户端数</th>
+                                <th>准确率</th>
+                                <th>精确率</th>
+                                <th>查全率</th>
+                                <th>F1分数</th>
+                                <th>耗时(秒)</th>
+                                <th>模型文件</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                <div class="pagination" id="logsPagination" style="display: none;">
+                    <button id="prevPage" onclick="prevLogsPage()" disabled>上一页</button>
+                    <span id="pageInfo">第 1 / 1 页</span>
+                    <button id="nextPage" onclick="nextLogsPage()" disabled>下一页</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 特征分析页面 (SHAP) -->
+        <div class="page" id="shap-page">
+            <div class="card">
+                <h2>🔍 特征贡献分析</h2>
+                <p style="color: #000; margin-bottom: 20px;">基于训练后的模型，分析各个特征对预测结果的贡献度</p>
+                
+                <div id="shapContent">
+                    <div class="loading">请完成模型训练后查看特征分析结果</div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button id="loadFeatureBtn" class="btn-primary" onclick="loadFeatureImportance()" style="padding: 12px 30px; font-size: 1em;">
+                        🔄 加载特征分析
+                    </button>
+                </div>
+                
+                <div id="modelVersionInfo" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.9em; color: #000;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let distributionChart = null;
+        let trainStatusInterval = null;
+        let logEventSource = null;  // SSE 连接
+        let displayedLogIds = new Set();  // 全局去重集合，持久化保存
+        let logPollInterval = null; // Polling backup interval
+        let lastDisplayedLogIndex = 0; // Track displayed log count globally
+        // 页面加载时获取数据集信息
+        window.onload = function() {
+            loadDatasetInfo();
+            loadLastClientData();  // 加载上次生成的客户端数据
+            setupNavigation();
+            checkTrainStatus();
+            loadUserInfo();
+            initChart();  // 初始化训练图表
+        };
+        
+        // 加载用户信息
+        function loadUserInfo() {
+            fetch('/api/auth/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.logged_in) {
+                        const userDisplay = `${data.username} (${data.role === 'admin' ? '管理员' : '用户'})`;
+                        console.log('当前用户:', userDisplay);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载用户信息失败:', error);
+                });
+        }
+
+        // 更新算法选择UI
+        function updateAlgorithmUI() {
+            const algorithm = document.getElementById('algorithmSelect').value;
+            const muGroup = document.getElementById('muGroup');
+            
+            if (algorithm === 'FedProx') {
+                muGroup.style.display = 'block';
+            } else {
+                muGroup.style.display = 'none';
+            }
+        }
+
+        // 更新mu值显示
+        function updateMuDisplay() {
+            const mu = parseFloat(document.getElementById('muValue').value);
+            document.getElementById('muDisplay').textContent = mu.toFixed(3);
+        }
+
+        // 更新加密选项UI（显示/隐藏差分隐私参数）
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                fetch('/api/logout', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/login';
+                    }
+                })
+                .catch(error => {
+                    console.error('退出登录失败:', error);
+                    alert('退出登录失败，请重试');
+                });
+            }
+        }
+
+        // 设置导航栏功能
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有活动状态
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 显示对应的页面
+                    const pageId = this.getAttribute('data-page');
+                    const pages = document.querySelectorAll('.page');
+                    pages.forEach(page => {
+                        page.classList.remove('active');
+                    });
+                    document.getElementById(pageId).classList.add('active');
+                    
+                    // 如果切换到训练页面，检查训练状态
+                    if (pageId === 'train-page') {
+                        checkTrainStatus();
+                        refreshLogs();
+                    }
+                    
+                    // 如果切换到特征分析页面，检查模型是否已训练并启动轮询
+                    if (pageId === 'shap-page') {
+                        checkModelAndLoadFeatures();
+                        startModelPolling();
+                    } else {
+                        // 离开特征分析页面时停止轮询
+                        stopModelPolling();
+                    }
+                    
+                    // 如果切换到日志汇总页面，加载日志汇总信息
+                    if (pageId === 'logs-page') {
+                        loadLogsSummary();
+                    }
+                });
+            });
+        }
+
+        // 加载数据集信息
+        async function loadDatasetInfo() {
+            try {
+                const response = await fetch('/dataset_info');
+                
+                // 检查响应状态
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // 检查Content-Type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('服务器返回的不是JSON数据');
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.info) {
+                    const info = result.info;
+                    document.getElementById('datasetInfo').innerHTML = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>${info.total_samples || 0}</h3>
+                                <p>总样本数</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>${info.positive_samples || 0}</h3>
+                                <p>阳性样本</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>${info.negative_samples || 0}</h3>
+                                <p>阴性样本</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>${((info.positive_ratio || 0) * 100).toFixed(2)}%</h3>
+                                <p>阳性比例</p>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <strong>特征列:</strong> ${(info.columns || []).join(', ')}
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('datasetInfo').innerHTML = 
+                        `<div class="error">${result.message || '数据加载失败，请检查数据文件是否存在'}</div>`;
+                }
+            } catch (error) {
+                console.error('加载数据集信息失败:', error);
+                document.getElementById('datasetInfo').innerHTML = 
+                    `<div class="error">加载失败: ${error.message}<br>请确保flask_app.py正在运行</div>`;
+            }
+        }
+
+        // 加载上次生成的客户端数据
+        async function loadLastClientData() {
+            try {
+                const response = await fetch('/last_client_data');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.has_data) {
+                    // 更新客户端数量输入框
+                    document.getElementById('numClients').value = result.num_clients;
+                    
+                    // 显示客户端数据（包含统计、图表和对比）
+                    displayClientsData(result.clients);
+                } else {
+                    // 没有上次数据，隐藏卡片
+                    document.getElementById('clientsCard').style.display = 'none';
+                    document.getElementById('comparisonCard').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('加载上次客户端数据失败:', error);
+            }
+        }
+
+        // 生成客户端数据
+        async function generateData() {
+            const numClients = document.getElementById('numClients').value;
+            const resultDiv = document.getElementById('generateResult');
+            
+            console.log('开始生成数据, 客户端数量:', numClients);
+            resultDiv.innerHTML = '<div class="loading">正在生成数据...</div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('num_clients', numClients);
+                
+                console.log('发送请求到 /generate_data');
+                const response = await fetch('/generate_data', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('响应状态:', response.status);
+                
+                // 检查响应状态
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('收到响应:', result);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `<div class="success">${result.message}</div>`;
+                    console.log('显示客户端数据, 数量:', result.clients_info.length);
+                    displayClientsData(result.clients_info);
+                } else {
+                    resultDiv.innerHTML = `<div class="error">${result.message}</div>`;
+                }
+            } catch (error) {
+                console.error('生成数据失败:', error);
+                resultDiv.innerHTML = `<div class="error">生成失败: ${error.message}<br>请检查控制台获取详细信息</div>`;
+            }
+        }
+
+        // 显示客户端数据
+        function displayClientsData(clientsInfo) {
+            // 显示统计卡片
+            const statsDiv = document.getElementById('clientsStats');
+            statsDiv.innerHTML = clientsInfo.map(client => `
+                <div class="stat-card">
+                    <h3>${client.id}</h3>
+                    <p>样本数: ${client.total_samples}</p>
+                    <p>阳性率: ${(client.positive_ratio * 100).toFixed(2)}%</p>
+                </div>
+            `).join('');
+
+            // 显示分布图表
+            displayDistributionChart(clientsInfo);
+
+            // 显示详细对比
+            displayClientComparison(clientsInfo);
+
+            // 显示卡片
+            document.getElementById('clientsCard').style.display = 'block';
+            document.getElementById('comparisonCard').style.display = 'block';
+        }
+
+        // 显示分布图表
+        function displayDistributionChart(clientsInfo) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            
+            if (distributionChart) {
+                distributionChart.destroy();
+            }
+
+            const labels = clientsInfo.map(c => c.id);
+            const totalSamples = clientsInfo.map(c => c.total_samples);
+            const positiveSamples = clientsInfo.map(c => c.positive_samples);
+            const negativeSamples = clientsInfo.map(c => c.negative_samples);
+
+            distributionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '阳性样本',
+                            data: positiveSamples,
+                            backgroundColor: 'rgba(91, 140, 90, 0.8)',
+                            borderColor: 'rgba(91, 140, 90, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: '阴性样本',
+                            data: negativeSamples,
+                            backgroundColor: 'rgba(183, 212, 137, 0.8)',
+                            borderColor: 'rgba(183, 212, 137, 1)',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: '各客户端样本分布',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: '客户端'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: '样本数量'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 显示客户端详细对比
+        function displayClientComparison(clientsInfo) {
+            const grid = document.getElementById('clientGrid');
+            grid.innerHTML = clientsInfo.map(client => `
+                <div class="client-card">
+                    <h3>${client.id}</h3>
+                    <div class="client-info">
+                        <strong>总样本数:</strong> ${client.total_samples}
+                    </div>
+                    <div class="client-info">
+                        <strong>阳性样本:</strong> ${client.positive_samples}
+                    </div>
+                    <div class="client-info">
+                        <strong>阴性样本:</strong> ${client.negative_samples}
+                    </div>
+                    <div class="client-info">
+                        <strong>阳性比例:</strong> ${(client.positive_ratio * 100).toFixed(2)}%
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 检查训练状态
+        async function checkTrainStatus() {
+            try {
+                const response = await fetch('/api/train/status');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                updateTrainStatus(result);
+            } catch (error) {
+                console.error('检查训练状态失败:', error);
+            }
+        }
+
+        // Update training status
+        function updateTrainStatus(status) {
+            const statusIndicator = document.getElementById('trainStatusIndicator');
+            const statusText = document.getElementById('trainStatusText');
+            const startTrainBtn = document.getElementById('startTrainBtn');
+            
+            if (status.is_training) {
+                statusIndicator.className = 'status-indicator running';
+                statusText.textContent = '训练中...';
+                startTrainBtn.disabled = true;
+                startTrainBtn.textContent = '训练中';
+                
+                // 如果训练中但没有SSE连接,重新建立（不清空已有日志）
+                if (!logEventSource || logEventSource.readyState === 2) {
+                    console.log('重新建立SSE连接');
+                    setupRealtimeLogs(false); // false = 不清空已有日志
+                }
+            } else {
+                statusIndicator.className = 'status-indicator stopped';
+                statusText.textContent = '';
+                startTrainBtn.disabled = false;
+                startTrainBtn.textContent = '开始训练';
+                
+                // Stop polling after training ends
+                if (trainStatusInterval) {
+                    clearInterval(trainStatusInterval);
+                    trainStatusInterval = null;
+                }
+                stopLogPolling();
+                
+                // Close SSE connection (delay 2s to ensure last logs are received)
+                setTimeout(() => {
+                    if (logEventSource) {
+                        logEventSource.close();
+                        logEventSource = null;
+                    }
+                }, 2000);
+                
+                // Load and display training metrics
+                loadTrainingMetrics();
+            }
+        }
+
+        // 图表实例
+        let globalMetricsChart = null;
+        let clientMetricsCharts = {};  // 改为对象，存储每个客户端的图表
+
+        // Load and display training metrics
+        async function loadTrainingMetrics() {
+            console.log('[DEBUG] 开始加载训练指标...');
+            try {
+                const response = await fetch('/api/train/metrics');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('[DEBUG] API返回结果:', result);
+                const metrics = result.metrics || {};
+                console.log('[DEBUG] 指标数据:', metrics);
+                
+                const metricsCard = document.getElementById('metricsCard');
+                const metricsInfo = document.getElementById('metricsInfo');
+                
+                if (metrics.rounds && metrics.rounds.length > 0) {
+                    console.log('[DEBUG] 找到', metrics.rounds.length, '轮数据，开始渲染图表');
+                    const lastRound = metrics.rounds[metrics.rounds.length - 1];
+                    
+                    metricsCard.style.display = 'block';
+                    metricsInfo.innerHTML = `
+                        <div class="metrics-summary">
+                            <h3>最终训练结果</h3>
+                            <div class="metrics-grid">
+                                <div class="metric-item">
+                                    <div class="metric-label">准确率</div>
+                                    <div class="metric-value">${(lastRound.global_test_accuracy * 100).toFixed(2)}%</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-label">查准率</div>
+                                    <div class="metric-value">${(lastRound.global_test_precision * 100).toFixed(2)}%</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-label">查全率</div>
+                                    <div class="metric-value">${(lastRound.global_test_recall * 100).toFixed(2)}%</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-label">F1分数</div>
+                                    <div class="metric-value">${(lastRound.global_test_f1_score * 100).toFixed(2)}%</div>
+                                </div>
+                                ${metrics.total_duration_seconds ? `
+                                <div class="metric-item">
+                                    <div class="metric-label">总训练耗时</div>
+                                    <div class="metric-value">${metrics.total_duration_seconds.toFixed(2)}秒</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div style="margin-top: 30px;">
+                                <h3>总模型指标变化</h3>
+                                <canvas id="globalMetricsChart" style="height: 400px;"></canvas>
+                            </div>
+                            
+                            <div id="clientChartsContainer" style="margin-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                                <!-- 客户端图表将在这里动态生成 -->
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 显示总模型指标变化折线图
+                    displayGlobalMetricsChart(metrics.rounds);
+                    // 显示客户端指标变化折线图（每个客户端一个图）
+                    displayClientMetricsCharts(metrics.rounds);
+                } else {
+                    console.log('[DEBUG] 没有找到训练数据，隐藏指标卡片');
+                    metricsCard.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('加载训练指标失败:', error);
+            }
+        }
+
+        // 显示总模型指标变化折线图
+        function displayGlobalMetricsChart(rounds) {
+            const ctx = document.getElementById('globalMetricsChart').getContext('2d');
+            
+            if (globalMetricsChart) {
+                globalMetricsChart.destroy();
+            }
+
+            const roundsArray = rounds.map(r => r.round);
+            const accuracy = rounds.map(r => r.global_test_accuracy * 100);
+            const precision = rounds.map(r => r.global_test_precision * 100);
+            const recall = rounds.map(r => r.global_test_recall * 100);
+            const f1Score = rounds.map(r => r.global_test_f1_score * 100);
+
+            globalMetricsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: roundsArray,
+                    datasets: [
+                        {
+                            label: '准确率',
+                            data: accuracy,
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            backgroundColor: 'transparent',
+                            tension: 0.3,
+                            fill: false,
+                            borderWidth: 2
+                        },
+                        {
+                            label: '查准率',
+                            data: precision,
+                            borderColor: 'rgba(118, 75, 162, 1)',
+                            backgroundColor: 'transparent',
+                            tension: 0.3,
+                            fill: false,
+                            borderWidth: 2
+                        },
+                        {
+                            label: '查全率',
+                            data: recall,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'transparent',
+                            tension: 0.3,
+                            fill: false,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'F1分数',
+                            data: f1Score,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'transparent',
+                            tension: 0.3,
+                            fill: false,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: '总模型指标变化',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '轮次'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '百分比 (%)'
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // 显示客户端指标变化折线图（每个客户端一个）
+        function displayClientMetricsCharts(rounds) {
+            const container = document.getElementById('clientChartsContainer');
+            
+            // 清空容器
+            container.innerHTML = '';
+            
+            // 销毁旧图表
+            Object.values(clientMetricsCharts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            clientMetricsCharts = {};
+            
+            if (rounds.length > 0 && rounds[0].clients && rounds[0].clients.length > 0) {
+                const clientIds = [...new Set(rounds.flatMap(r => r.clients.map(c => c.client_id)))];
+                const roundsArray = rounds.map(r => r.round);
+                
+                // 为每个客户端创建一个独立的图表
+                clientIds.forEach((clientId, idx) => {
+                    // 为每个客户端创建canvas容器
+                    const chartDiv = document.createElement('div');
+                    chartDiv.style.marginTop = '20px';
+                    chartDiv.innerHTML = `
+                        <h3 style="font-size: 1.1em; margin-bottom: 10px;">${clientId} 指标变化</h3>
+                        <canvas id="clientChart_${idx}" style="height: 250px;"></canvas>
+                    `;
+                    container.appendChild(chartDiv);
+                    
+                    // 提取该客户端的数据
+                    const accuracy = rounds.map(r => {
+                        const client = r.clients.find(c => c.client_id === clientId);
+                        return client ? client.accuracy * 100 : null;
+                    });
+                    
+                    const precision = rounds.map(r => {
+                        const client = r.clients.find(c => c.client_id === clientId);
+                        return client ? client.precision * 100 : null;
+                    });
+                    
+                    const recall = rounds.map(r => {
+                        const client = r.clients.find(c => c.client_id === clientId);
+                        return client ? client.recall * 100 : null;
+                    });
+                    
+                    const f1Score = rounds.map(r => {
+                        const client = r.clients.find(c => c.client_id === clientId);
+                        return client ? client.f1_score * 100 : null;
+                    });
+                    
+                    // 创建图表
+                    const ctx = document.getElementById(`clientChart_${idx}`).getContext('2d');
+                    clientMetricsCharts[clientId] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: roundsArray,
+                            datasets: [
+                                {
+                                    label: '准确率',
+                                    data: accuracy,
+                                    borderColor: 'rgba(102, 126, 234, 1)',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.3,
+                                    fill: false,
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: '查准率',
+                                    data: precision,
+                                    borderColor: 'rgba(118, 75, 162, 1)',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.3,
+                                    fill: false,
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: '查全率',
+                                    data: recall,
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.3,
+                                    fill: false,
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'F1分数',
+                                    data: f1Score,
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.3,
+                                    fill: false,
+                                    borderWidth: 2
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        boxWidth: 12,
+                                        font: {
+                                            size: 11
+                                        }
+                                    }
+                                },
+                                title: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: '轮次',
+                                        font: {
+                                            size: 12
+                                        }
+                                    },
+                                    ticks: {
+                                        font: {
+                                            size: 10
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: '百分比 (%)',
+                                        font: {
+                                            size: 12
+                                        }
+                                    },
+                                    ticks: {
+                                        font: {
+                                            size: 10
+                                        }
+                                    },
+                                    min: 0,
+                                    max: 100
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        // 开始训练
+        let trainingChart = null;
+        let metricsData = { rounds: [], acc: [], precision: [], recall: [], f1: [] };
+        let pollingInterval = null;
+        let isTraining = false;
+
+        // 初始化图表
+        function initChart() {
+            const ctx = document.getElementById('trainingChart').getContext('2d');
+            trainingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: '准确率', data: [], borderColor: '#5B8C5A', tension: 0.3 },
+                        { label: '精确率', data: [], borderColor: '#4CAF50', tension: 0.3 },
+                        { label: '查全率', data: [], borderColor: '#ff9800', tension: 0.3 },
+                        { label: 'F1分数', data: [], borderColor: '#f44336', tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 1, title: { display: true, text: '指标值' } },
+                        x: { title: { display: true, text: '训练轮次' } }
+                    }
+                }
+            });
+        }
+
+        // 更新图表
+        function updateChart() {
+            if (!trainingChart) return;
+            trainingChart.data.labels = metricsData.rounds.map(r => `第${r}轮`);
+            trainingChart.data.datasets[0].data = metricsData.acc;
+            trainingChart.data.datasets[1].data = metricsData.precision;
+            trainingChart.data.datasets[2].data = metricsData.recall;
+            trainingChart.data.datasets[3].data = metricsData.f1;
+            trainingChart.update('none');
+        }
+
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const container = document.getElementById('trainLogs');
+            const timestamp = new Date().toLocaleTimeString('zh-CN');
+            const typeClass = `log-${type}`;
+            const logItem = `<div class="log-item"><span class="timestamp">[${timestamp}]</span><span class="${typeClass}"> ${message}</span></div>`;
+            container.innerHTML += logItem;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 开始训练
+        // 切换差分隐私参数显示
+        function togglePrivacyParams() {
+            const privacy = document.getElementById('privacySelect').value;
+            const paramsDiv = document.getElementById('privacyParams');
+            paramsDiv.style.display = privacy === 'differential' ? 'block' : 'none';
+        }
+
+        // 更新epsilon显示
+        function updateEpsilon(value) {
+            document.getElementById('epsilonValue').textContent = parseFloat(value).toFixed(1);
+        }
+
+        // 更新delta显示
+        function updateDelta(value) {
+            const numValue = parseFloat(value);
+            if (numValue < 0.001) {
+                document.getElementById('deltaValue').textContent = numValue.toExponential(1);
+            } else {
+                document.getElementById('deltaValue').textContent = numValue.toFixed(5);
+            }
+        }
+
+        async function startTraining() {
+            const btn = document.getElementById('startTrainBtn');
+            const statusMsg = document.getElementById('statusMessage');
+            const resultDiv = document.getElementById('trainResult');
+
+            if (isTraining) return;
+
+            isTraining = true;
+            btn.disabled = true;
+            btn.textContent = '训练中...';
+            statusMsg.textContent = '正在启动服务器和客户端...';
+            resultDiv.innerHTML = '';
+
+            // 重置数据
+            metricsData = { rounds: [], acc: [], precision: [], recall: [], f1: [] };
+            updateChart();
+            ['final-acc', 'final-precision', 'final-recall', 'final-f1', 'final-time'].forEach(id => {
+                document.getElementById(id).textContent = '--';
+            });
+
+            // 获取配置
+            const algorithm = document.getElementById('algorithmSelect').value;
+            const mu = algorithm === 'FedProx' ? document.getElementById('muValue').value : '0.01';
+            const privacy = document.getElementById('privacySelect').value;
+            
+            // 获取差分隐私参数
+            const epsilon = parseFloat(document.getElementById('epsilon').value);
+            const delta = parseFloat(document.getElementById('delta').value);
+
+            addLog(`启动训练 - 算法: ${algorithm.toUpperCase()}, 隐私保护: ${privacy}`, 'info');
+            if (privacy === 'differential') {
+                addLog(`差分隐私参数 - ε: ${epsilon}, δ: ${delta}`, 'info');
+            }
+
+            try {
+                const response = await fetch('/api/start_fl', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        algorithm,
+                        mu: parseFloat(mu),
+                        privacy,
+                        epsilon,
+                        delta
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    statusMsg.textContent = '启动成功！正在训练...';
+                    addLog('服务器和客户端启动成功', 'success');
+                    startPolling();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                addLog(`启动失败: ${error.message}`, 'error');
+                statusMsg.textContent = `启动失败: ${error.message}`;
+                isTraining = false;
+                btn.disabled = false;
+                btn.textContent = '🚀 开始训练';
+            }
+        }
+
+        // 轮询训练状态
+        function startPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('http://localhost:5001/api/training_status');
+                    if (!response.ok) throw new Error('获取状态失败');
+
+                    const status = await response.json();
+
+                    // 更新指标
+                    if (status.metrics && status.metrics.length > 0) {
+                        const lastMetric = status.metrics[status.metrics.length - 1];
+                        const round = status.metrics.length;
+
+                        if (!metricsData.rounds.includes(round)) {
+                            metricsData.rounds.push(round);
+                            metricsData.acc.push(lastMetric.global_accuracy || 0);
+                            metricsData.precision.push(lastMetric.global_precision || 0);
+                            metricsData.recall.push(lastMetric.global_recall || 0);
+                            metricsData.f1.push(lastMetric.global_f1 || 0);
+                            updateChart();
+                            addLog(`第 ${round} 轮完成 - 准确率: ${(lastMetric.global_accuracy * 100).toFixed(2)}%`, 'success');
+                        }
+                    }
+
+                    // 训练完成
+                    if (status.training_complete) {
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+
+                        if (status.final_metrics) {
+                            document.getElementById('final-acc').textContent = 
+                                (status.final_metrics.accuracy * 100).toFixed(2) + '%';
+                            document.getElementById('final-precision').textContent = 
+                                (status.final_metrics.precision * 100).toFixed(2) + '%';
+                            document.getElementById('final-recall').textContent = 
+                                (status.final_metrics.recall * 100).toFixed(2) + '%';
+                            document.getElementById('final-f1').textContent = 
+                                (status.final_metrics.f1 * 100).toFixed(2) + '%';
+                            document.getElementById('final-time').textContent = 
+                                status.final_metrics.duration + '秒';
+                        }
+
+                        addLog('训练完成！', 'success');
+                        document.getElementById('statusMessage').textContent = '训练完成！';
+                        isTraining = false;
+                        document.getElementById('startTrainBtn').disabled = false;
+                        document.getElementById('startTrainBtn').textContent = '🚀 开始训练';
+                    }
+
+                } catch (error) {
+                    if (metricsData.rounds.length > 0 && isTraining) {
+                        addLog('服务器已关闭，训练结束', 'warning');
+                        document.getElementById('statusMessage').textContent = '训练完成！(服务器已关闭)';
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                        isTraining = false;
+                        document.getElementById('startTrainBtn').disabled = false;
+                        document.getElementById('startTrainBtn').textContent = '🚀 开始训练';
+                    }
+                }
+            }, 2000);
+        }
+        
+        // 清空训练指标显示
+        function clearMetricsDisplay() {
+            const metricsCard = document.getElementById('metricsCard');
+            const metricsInfo = document.getElementById('metricsInfo');
+            
+            // 隐藏指标卡片
+            metricsCard.style.display = 'none';
+            metricsInfo.innerHTML = '<div class="loading">训练完成后将显示指标...</div>';
+            
+            // 销毁旧图表
+            if (globalMetricsChart) {
+                globalMetricsChart.destroy();
+                globalMetricsChart = null;
+            }
+            
+            // 销毁所有客户端图表
+            Object.values(clientMetricsCharts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            clientMetricsCharts = {};
+            
+            console.log('已清空旧训练指标');
+        }
+
+        // 设置实时日志流（SSE）
+        function setupRealtimeLogs(clearExisting = true) {
+            // 如果已有连接，先关闭
+            if (logEventSource) {
+                logEventSource.close();
+                logEventSource = null;
+            }
+            
+            // 只在首次连接时清空日志和去重集合
+            if (clearExisting) {
+                const logsDiv = document.getElementById('trainLogs');
+                logsDiv.innerHTML = '';
+                lastDisplayedLogIndex = 0; // 重置计数
+                displayedLogIds.clear();  // 清空去重集合
+                console.log('清空日志和去重集合');
+            }
+            
+            console.log('建立SSE连接, clearExisting:', clearExisting, '当前已显示日志数:', displayedLogIds.size);
+            
+            // 创建 EventSource 连接
+            logEventSource = new EventSource('/api/train/logs/stream');
+            
+            // Listen for message events
+            logEventSource.onmessage = function(event) {
+                try {
+                    const logEntry = JSON.parse(event.data);
+                    
+                    // 使用timestamp+message作为唯一标识，防止重复
+                    const logId = `${logEntry.timestamp}_${logEntry.message}`;
+                    if (!displayedLogIds.has(logId)) {
+                        displayedLogIds.add(logId);
+                        appendLogEntry(logEntry);
+                    } else {
+                        // 可选：记录重复日志（调试用）
+                        // console.log('跳过重复日志:', logEntry.message.substring(0, 50));
+                    }
+                } catch (error) {
+                    console.error('Failed to parse log:', error);
+                }
+            };
+            
+            // Listen for error events - 训练期间自动重连
+            logEventSource.onerror = function(error) {
+                console.error('SSE connection error, 连接状态:', logEventSource.readyState);
+                
+                // 如果连接已关闭，清理
+                if (logEventSource.readyState === 2) { // CLOSED
+                    logEventSource.close();
+                    logEventSource = null;
+                    
+                    // 如果还在训练中，尝试重连
+                    if (trainStatusInterval) {
+                        console.log('SSE连接已关闭，将在1秒后重连...');
+                        setTimeout(() => {
+                            if (trainStatusInterval && !logEventSource) {
+                                console.log('尝试重新建立SSE连接...');
+                                setupRealtimeLogs(false); // 重连时不清空日志
+                            }
+                        }, 1000);  // 缩短重连间隔到1秒
+                    } else {
+                        console.log('训练已结束，不再重连SSE');
+                    }
+                }
+            };
+            
+            // 连接成功
+            logEventSource.onopen = function() {
+                console.log('SSE连接成功建立');
+            };
+        }
+        
+        // 启动日志轮询备用机制（仅在SSE不可用时）
+        function startLogPolling() {
+            if (logEventSource && logEventSource.readyState === 1) {
+                // SSE连接正常，不需要轮询
+                return;
+            }
+            stopLogPolling(); // Clear existing
+            logPollInterval = setInterval(() => {
+                if (trainStatusInterval) { // Only during training
+                    pollNewLogs();
+                }
+            }, 2000); // Every 2 seconds
+            console.log('日志轮询备用机制已启动 (2秒间隔)');
+        }
+        
+        // 停止日志轮询
+        function stopLogPolling() {
+            if (logPollInterval) {
+                clearInterval(logPollInterval);
+                logPollInterval = null;
+            }
+        }
+        
+        // 添加单条日志到显示区
+        function appendLogEntry(logEntry) {
+            const logsDiv = document.getElementById('trainLogs');
+
+            // 如果是第一条日志，清空加载提示
+            if (logsDiv.querySelector('.loading')) {
+                logsDiv.innerHTML = '';
+            }
+
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+
+            // 清理message中的多余换行符，保留有意义的多行内容
+            let message = logEntry.message.trim();
+
+            // 应用终端色彩样式
+            if (message.includes('[INFO]')) {
+                message = message.replace('[INFO]', '<span class="log-info">[INFO]</span>');
+            }
+            if (message.includes('[OK]')) {
+                message = message.replace('[OK]', '<span class="log-success">[OK]</span>');
+            }
+            if (message.includes('[WARN]') || message.includes('[WARNING]')) {
+                message = message.replace('[WARN]', '<span class="log-warning">[WARN]</span>');
+                message = message.replace('[WARNING]', '<span class="log-warning">[WARNING]</span>');
+            }
+            if (message.includes('[ERROR]')) {
+                message = message.replace('[ERROR]', '<span class="log-error">[ERROR]</span>');
+            }
+            if (message.includes('[TRAIN]') || message.includes('[AGGR]') || message.includes('[EVAL]')) {
+                message = message.replace('[TRAIN]', '<span class="log-accent">[TRAIN]</span>');
+                message = message.replace('[AGGR]', '<span class="log-accent">[AGGR]</span>');
+                message = message.replace('[EVAL]', '<span class="log-accent">[EVAL]</span>');
+            }
+
+            logItem.innerHTML = `<span class="timestamp">${logEntry.timestamp}</span><span class="message">${message}</span>`;
+
+            logsDiv.appendChild(logItem);
+            lastDisplayedLogIndex++;
+
+            // 自动滚动到底部
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        // Polling fallback: check for new logs every 1 second during training
+        function pollNewLogs() {
+            if (!trainStatusInterval) return; // Only poll during training
+            
+            fetch('/api/train/status')
+                .then(response => response.json())
+                .then(status => {
+                    if (status.is_training && status.latest_logs && status.latest_logs.length > 0) {
+                        // 使用Set去重，只显示未显示的日志
+                        const logsDiv = document.getElementById('trainLogs');
+                        const existingMessages = new Set(
+                            Array.from(logsDiv.querySelectorAll('.message'))
+                                .map(el => el.textContent.trim())
+                        );
+                        
+                        let hasNewLogs = false;
+                        status.latest_logs.forEach(log => {
+                            if (!existingMessages.has(log.message)) {
+                                appendLogEntry(log);
+                                hasNewLogs = true;
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Poll logs error:', err);
+                });
+        }
+
+        // 刷新训练日志（保留用于手动刷新）
+        async function refreshLogs() {
+            const logsDiv = document.getElementById('trainLogs');
+            
+            // 检查是否已有日志内容，如果有则不刷新
+            if (logsDiv.innerHTML.trim() !== '' && !logsDiv.innerHTML.includes('获取日志失败')) {
+                return; // 已有日志，不需要刷新
+            }
+            
+            // 显示默认提示
+            logsDiv.innerHTML = '<div class="log-item"><span class="timestamp">[系统]</span><span class="log-info"> 欢迎使用 HTTP 联邦学习训练控制台</span></div><div class="log-item"><span class="timestamp">[系统]</span><span class="log-info"> 点击"开始训练"启动联邦学习任务</span></div>';
+        }
+        
+        // 特征分析图表实例
+        let featureImportanceChart = null;
+        
+        let modelPollingInterval = null;
+        let lastModelVersion = null;
+        
+        // 检查模型状态并自动加载特征分析
+        async function checkModelAndLoadFeatures() {
+            try {
+                const response = await fetch('/api/model/status');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.model_loaded) {
+                    // 检查模型版本是否更新
+                    if (result.model_version !== lastModelVersion) {
+                        lastModelVersion = result.model_version;
+                        // 模型已加载，自动加载特征分析
+                        const shapContent = document.getElementById('shapContent');
+                        shapContent.innerHTML = '<div class="loading">检测到新模型，正在重新分析特征贡献度...</div>';
+                        await loadFeatureImportance();
+                    }
+                } else {
+                    // 模型未加载
+                    lastModelVersion = null;
+                    const shapContent = document.getElementById('shapContent');
+                    shapContent.innerHTML = `
+                        <div class="error">
+                            <strong>模型未加载</strong><br>
+                            请先在"训练日志"页面完成模型训练，然后再来查看特征分析结果。
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('检查模型状态失败:', error);
+                const shapContent = document.getElementById('shapContent');
+                shapContent.innerHTML = `<div class="error">检查模型状态失败: ${error.message}</div>`;
+            }
+        }
+        
+        // 启动模型状态轮询
+        function startModelPolling() {
+            if (modelPollingInterval) {
+                clearInterval(modelPollingInterval);
+            }
+            // 每5秒检查一次模型状态
+            modelPollingInterval = setInterval(checkModelAndLoadFeatures, 5000);
+        }
+        
+        // 停止模型状态轮询
+        function stopModelPolling() {
+            if (modelPollingInterval) {
+                clearInterval(modelPollingInterval);
+                modelPollingInterval = null;
+            }
+        }
+        
+        // 加载特征重要性分析
+        async function loadFeatureImportance() {
+            const shapContent = document.getElementById('shapContent');
+            const loadBtn = document.getElementById('loadFeatureBtn');
+            const versionInfo = document.getElementById('modelVersionInfo');
+            
+            loadBtn.disabled = true;
+            loadBtn.textContent = '加载中...';
+            shapContent.innerHTML = '<div class="loading">正在分析特征贡献度...</div>';
+            
+            try {
+                const response = await fetch('/api/model/feature_importance');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 显示模型版本信息
+                    if (result.model_version) {
+                        versionInfo.textContent = `模型版本: ${result.model_version}`;
+                    }
+                    
+                    // 显示特征重要性图表
+                    displayFeatureImportanceChart(result.features);
+                } else {
+                    shapContent.innerHTML = `<div class="error">${result.message}</div>`;
+                }
+            } catch (error) {
+                console.error('加载特征分析失败:', error);
+                shapContent.innerHTML = `<div class="error">加载失败: ${error.message}</div>`;
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.textContent = '🔄 加载特征分析';
+            }
+        }
+        
+        // 显示特征重要性柱状图
+        function displayFeatureImportanceChart(features) {
+            const container = document.getElementById('shapContent');
+            
+            // 销毁旧图表
+            if (featureImportanceChart) {
+                featureImportanceChart.destroy();
+            }
+            
+            // 只显示前20个最重要的特征
+            const topFeatures = features.slice(0, 20);
+            
+            // 动态获取前三名特征
+            const top3Features = topFeatures.slice(0, 3).map(f => f.feature);
+            const top3Text = top3Features.join('、');
+            
+            // 创建图表容器
+            container.innerHTML = `
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 20px; font-size: 1.3em;">Top 20 重要特征</h3>
+                    <canvas id="featureImportanceChart" style="height: 500px;"></canvas>
+                </div>
+                <div style="margin-top: 30px; padding: 20px; background: #f0f4f8; border-radius: 10px;">
+                    <h4 style="margin-bottom: 10px;">📝 分析说明</h4>
+                    <p style="line-height: 1.8; color: #000;">
+                        本图展示了基于 SHAP 算法计算的糖尿病预测模型前 20 个关键特征贡献度。SHAP 值越高，代表该特征对模型预测结果的影响越大。结果显示，<strong>${top3Text}</strong>等特征对糖尿病风险预测最为关键。
+                    </p>
+                </div>
+            `;
+            
+            // 准备数据
+            const featureNames = topFeatures.map(f => f.feature);
+            const importanceValues = topFeatures.map(f => f.importance);
+            
+            // 创建图表
+            const ctx = document.getElementById('featureImportanceChart').getContext('2d');
+            featureImportanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: featureNames,
+                    datasets: [{
+                        label: '特征重要性',
+                        data: importanceValues,
+                        backgroundColor: [
+                            'rgba(91, 140, 90, 0.7)',
+                            'rgba(183, 212, 137, 0.7)',
+                            'rgba(219, 233, 221, 0.7)',
+                            'rgba(139, 195, 74, 0.7)',
+                            'rgba(67, 160, 71, 0.7)',
+                        ].concat(Array(Math.max(0, featureNames.length - 5)).fill('rgba(201, 203, 207, 0.7)')),
+                        borderColor: [
+                            'rgba(91, 140, 90, 1)',
+                            'rgba(183, 212, 137, 1)',
+                            'rgba(219, 233, 221, 1)',
+                            'rgba(139, 195, 74, 1)',
+                            'rgba(67, 160, 71, 1)',
+                        ].concat(Array(Math.max(0, featureNames.length - 5)).fill('rgba(201, 203, 207, 1)')),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',  // 水平柱状图
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '重要性: ' + context.parsed.x.toFixed(4);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '重要性得分',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '特征名称',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        // 日志分页变量
+        let currentLogsPage = 1;
+        let totalLogsPages = 1;
+        let logsData = [];
+        const logsPerPage = 10;
+
+        // 加载日志汇总信息
+        async function loadLogsSummary() {
+            try {
+                const logsContent = document.getElementById('logsSummaryContent');
+                logsContent.innerHTML = '<div class="loading">正在加载日志汇总信息...</div>';
+                
+                // 获取训练结果数据（从数据库）
+                const response = await fetch('/api/training/results');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message || '获取数据失败');
+                }
+                
+                logsData = result.data || [];
+                currentLogsPage = 1;
+                totalLogsPages = Math.ceil(logsData.length / logsPerPage);
+                
+                // 隐藏旧的内容区域
+                logsContent.style.display = 'none';
+                
+                // 更新统计摘要
+                updateLogsSummaryStats(logsData);
+                
+                // 显示表格
+                displayLogsTable(logsData.slice(0, logsPerPage));
+                
+                // 更新分页控件
+                updateLogsPagination();
+                
+            } catch (error) {
+                console.error('加载日志汇总失败:', error);
+                document.getElementById('logsSummaryContent').innerHTML = `
+                    <div class="error">加载失败: ${error.message}</div>
+                `;
+                document.getElementById('logsSummaryStats').style.display = 'none';
+                document.getElementById('logsTableContainer').style.display = 'none';
+                document.getElementById('logsPagination').style.display = 'none';
+            }
+        }
+
+        // 更新统计摘要
+        function updateLogsSummaryStats(data) {
+            if (data.length === 0) {
+                document.getElementById('logsSummaryStats').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('logsSummaryStats').style.display = 'grid';
+            
+            // 总训练次数
+            document.getElementById('totalTrainCount').textContent = data.length;
+            
+            // 平均准确率
+            const avgAcc = data.reduce((sum, item) => sum + (item.准确率 || 0), 0) / data.length;
+            document.getElementById('avgAccuracy').textContent = `${(avgAcc * 100).toFixed(2)}%`;
+            
+            // 平均耗时
+            const avgDuration = data.reduce((sum, item) => sum + (item.时间消耗秒 || 0), 0) / data.length;
+            document.getElementById('avgDuration').textContent = avgDuration.toFixed(2);
+            
+            // 最近训练时间
+            const latest = data[0];
+            if (latest && latest.训练时间) {
+                document.getElementById('latestTrain').textContent = formatDateTime(latest.训练时间);
+            }
+        }
+
+        // 显示日志表格
+        function displayLogsTable(data) {
+            const tableBody = document.getElementById('logsTableBody');
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="12" class="empty-state">
+                            <div style="padding: 20px;">暂无训练日志数据</div>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('logsTableContainer').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('logsTableContainer').style.display = 'block';
+            
+            let html = '';
+            data.forEach((item, index) => {
+                html += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${formatDateTime(item.训练时间)}</td>
+                        <td>${item.算法 || '-'}</td>
+                        <td>${item.隐私保护方式 || item.加密方式 || item.隐私保护 || '-'}</td>
+                        <td class="number">${item.客户端数量 || 0}</td>
+                        <td class="number">${(item.准确率 * 100).toFixed(2)}%</td>
+                        <td class="number">${(item.精确率 * 100).toFixed(2)}%</td>
+                        <td class="number">${(item.查全率 * 100).toFixed(2)}%</td>
+                        <td class="number">${(item.F1分数 * 100).toFixed(2)}%</td>
+                        <td class="number">${(item.时间消耗秒 || 0).toFixed(2)}</td>
+                        <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${item.模型文件名 || '-'}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+
+        // 更新分页控件
+        function updateLogsPagination() {
+            document.getElementById('pageInfo').textContent = `第 ${currentLogsPage} / ${totalLogsPages} 页`;
+            document.getElementById('prevPage').disabled = currentLogsPage <= 1;
+            document.getElementById('nextPage').disabled = currentLogsPage >= totalLogsPages;
+            document.getElementById('logsPagination').style.display = totalLogsPages > 1 ? 'flex' : 'none';
+        }
+
+        // 上一页
+        function prevLogsPage() {
+            if (currentLogsPage > 1) {
+                currentLogsPage--;
+                const start = (currentLogsPage - 1) * logsPerPage;
+                const end = start + logsPerPage;
+                displayLogsTable(logsData.slice(start, end));
+                updateLogsPagination();
+            }
+        }
+
+        // 下一页
+        function nextLogsPage() {
+            if (currentLogsPage < totalLogsPages) {
+                currentLogsPage++;
+                const start = (currentLogsPage - 1) * logsPerPage;
+                const end = start + logsPerPage;
+                displayLogsTable(logsData.slice(start, end));
+                updateLogsPagination();
+            }
+        }
+
+        // 格式化日期时间（处理时区问题）
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                // 移除可能的引号或空格
+                const cleanStr = String(dateStr).trim().replace(/["']/g, '');
+                
+                // 尝试匹配多种日期格式：YYYY-MM-DD HH:MM:SS 或 YYYY-MM-DD HH:MM
+                const match = cleanStr.match(/^(\d{4})[-/](\d{2})[-/](\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
+                if (match) {
+                    // 创建本地时间对象（年, 月-1, 日, 时, 分, 秒）
+                    const date = new Date(
+                        parseInt(match[1]),
+                        parseInt(match[2]) - 1,
+                        parseInt(match[3]),
+                        parseInt(match[4]),
+                        parseInt(match[5]),
+                        parseInt(match[6]) || 0
+                    );
+                    // 验证日期是否有效
+                    if (!isNaN(date.getTime())) {
+                        return date.toLocaleString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+                    }
+                }
+                // 如果匹配失败，直接返回原始字符串
+                return cleanStr;
+            } catch {
+                return String(dateStr);
+            }
+        }
+    </script>
+</body>
+</html>

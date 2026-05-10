@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Models
+http_federated/saved_models/
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+flask_session/
+
+# Data files
+clients_data/
+clients_data_3clients/
+clients_data_4clients/
+clients_data_5clients/
+*.xlsx
+global_test_set.csv
+
+# Confidential files
+*password*
+*secret*
+*token*
+
+# Temporary files
+*.tmp
+*.bak
+check_table.py
+
+# Root level pycache
+pycache/

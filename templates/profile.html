@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户画像 - 健康管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .navbar {
+            position: relative;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 15px;
+            z-index: 0;
+        }
+
+        .navbar > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .navbar a {
+            color: #1a4017;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .navbar a:hover, .navbar a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .header {
+            text-align: center;
+            color: #1a4017;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #5B8C5A;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-left: 4px solid #5B8C5A;
+            padding-left: 15px;
+        }
+
+        .card h3 {
+            color: #000;
+            margin: 20px 0 15px;
+            font-size: 1.2em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .btn {
+            position: relative;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #1a4017;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 25px;
+            z-index: 0;
+        }
+
+        .btn > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        /* 表单样式 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #000;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #5B8C5A;
+        }
+
+        /* 指标卡片 */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .metric-card {
+            position: relative;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #1a4017;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 10px;
+            z-index: 0;
+        }
+
+        .metric-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        /* 历史记录表格 */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
+        }
+
+        .history-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .history-table .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .history-table .btn {
+            padding: 6px 15px;
+            font-size: 0.85em;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #000;
+        }
+
+        .empty-state .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        /* 提示信息 */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 开关按钮 */
+        .switch-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #5B8C5A;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* 风险状态样式 */
+        .high-risk {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .low-risk {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .history-table {
+                font-size: 0.85em;
+            }
+
+            .history-table .action-buttons {
+                flex-direction: column;
+            }
+
+            .navbar ul {
+                gap: 10px;
+            }
+
+            .navbar a {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+
+        /* 对比分析样式 */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .change-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+
+        .change-card.positive {
+            border-left-color: #28a745;
+        }
+
+        .change-card.negative {
+            border-left-color: #dc3545;
+        }
+
+        .change-card.neutral {
+            border-left-color: #6c757d;
+        }
+
+        .change-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .change-label {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .change-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .change-badge.up {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .change-badge.down {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .change-badge.same {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .change-values {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .change-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .change-value.old {
+            color: #000;
+            text-decoration: line-through;
+        }
+
+        .change-value.new {
+            color: #000;
+        }
+
+        .change-percentage {
+            font-size: 0.9em;
+            color: #000;
+        }
+
+        /* 最大变化指标 */
+        .top-changes {
+            position: relative;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            color: #1a4017;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-changes::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/44ca7b07af12dd1b88c7e3274036c0f.jpg') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            border-radius: 12px;
+            z-index: 0;
+        }
+
+        .top-changes > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .top-changes h3 {
+            margin-bottom: 15px;
+            color: #1a4017;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .top-change-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .top-change-item:last-child {
+            border-bottom: none;
+        }
+
+        .top-change-name {
+            font-weight: bold;
+        }
+
+        .top-change-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* AI分析样式 */
+        .ai-analysis {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+
+        .ai-analysis .loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .ai-analysis .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #5B8C5A;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .analysis-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .analysis-section h4 {
+            color: #5B8C5A;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <ul>
+                <li><a href="/profile" class="nav-link active">用户画像</a></li>
+                <li><a href="/predict" class="nav-link">健康预测</a></li>
+                <li><a href="/report" class="nav-link">健康报告</a></li>
+                <li><a href="#" onclick="logout()" style="background: rgba(255, 100, 100, 0.2);">退出登录</a></li>
+            </ul>
+        </nav>
+
+        <div class="header">
+            <h1>👤 用户画像</h1>
+            <p>管理您的健康数据，查看历史记录</p>
+        </div>
+
+        <!-- 用户画像卡片 -->
+        <div class="card">
+            <h2>📊 当前健康画像</h2>
+            <div id="profile-content">
+                <div class="empty-state">
+                    <div class="icon">👤</div>
+                    <p>暂无健康数据，请先进行健康预测</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 指标变化对比卡片 -->
+        <div class="card" id="comparison-card" style="display: none;">
+            <h2>📈 指标变化对比</h2>
+            <div id="comparison-content">
+                <div class="empty-state">
+                    <div class="icon">📊</div>
+                    <p>需要至少两次预测记录才能进行对比分析</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI分析卡片 -->
+        <div class="card" id="ai-analysis-card" style="display: none;">
+            <h2>🧠 AI 健康分析报告</h2>
+            <div id="ai-analysis-content">
+                <div style="text-align: center; padding: 20px;">
+                    <button class="btn" onclick="generateAnalysis()">📝 生成分析报告</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史预测记录 -->
+        <div class="card">
+            <h2>📜 历史预测记录</h2>
+            <div id="history-content">
+                <div class="empty-state">
+                    <div class="icon">📋</div>
+                    <p>暂无历史记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 加载用户画像（最近一次预测记录）
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/user/profile');
+                const result = await response.json();
+                
+                if (result.success && result.profile) {
+                    displayProfile(result.profile);
+                }
+            } catch (error) {
+                console.error('加载用户画像失败:', error);
+            }
+        }
+
+        // 显示用户画像
+        function displayProfile(profile) {
+            const content = document.getElementById('profile-content');
+            content.innerHTML = `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">年龄</div>
+                        <div class="metric-value">${profile.年龄 || '--'}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">性别</div>
+                        <div class="metric-value">${profile.性别 === 1 ? '男' : profile.性别 === 0 ? '女' : '--'}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">BMI</div>
+                        <div class="metric-value">${profile.体重指数 || '--'}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">收缩压</div>
+                        <div class="metric-value">${profile.收缩压 || '--'}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">舒张压</div>
+                        <div class="metric-value">${profile.舒张压 || '--'}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">空腹血糖</div>
+                        <div class="metric-value">${profile.空腹血糖 || '--'}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">糖化血红蛋白</div>
+                        <div class="metric-value">${profile.糖化血红蛋白 || '--'}%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">总胆固醇</div>
+                        <div class="metric-value">${profile.总胆固醇 || '--'}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">预测结果</div>
+                        <div class="metric-value ${profile.预测结果 === 1 ? 'high-risk' : 'low-risk'}">${profile.预测结果 === 1 ? '糖尿病风险' : profile.预测结果 === 0 ? '健康' : '--'}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <p><strong>预测时间:</strong> ${profile.created_at || '--'}</p>
+                    <p><strong>预测风险:</strong> ${profile.预测风险 !== undefined ? (profile.预测风险 * 100).toFixed(1) + '%' : '--'}</p>
+                </div>
+            `;
+        }
+
+        // 加载历史预测记录
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/user/metrics');
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    displayHistory(result.data);
+                }
+            } catch (error) {
+                console.error('加载历史记录失败:', error);
+            }
+        }
+
+        // 显示历史预测记录
+        function displayHistory(records) {
+            const content = document.getElementById('history-content');
+            content.innerHTML = `
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>预测时间</th>
+                            <th>年龄</th>
+                            <th>性别</th>
+                            <th>BMI</th>
+                            <th>血压</th>
+                            <th>血糖</th>
+                            <th>预测结果</th>
+                            <th>预测风险</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${records.map(record => `
+                            <tr>
+                                <td>${record.created_at}</td>
+                                <td>${record.年龄 || '--'}</td>
+                                <td>${record.性别 === 1 ? '男' : record.性别 === 0 ? '女' : '--'}</td>
+                                <td>${record.体重指数 || '--'}</td>
+                                <td>${record.收缩压 || '--'}/${record.舒张压 || '--'}</td>
+                                <td>${record.空腹血糖 || '--'}</td>
+                                <td><span class="${record.预测结果 === 1 ? 'high-risk' : 'low-risk'}">${record.预测结果 === 1 ? '糖尿病风险' : record.预测结果 === 0 ? '健康' : '--'}</span></td>
+                                <td>${record.预测风险 !== undefined ? (record.预测风险 * 100).toFixed(1) + '%' : '--'}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-secondary" onclick="viewRecord(${record.id})">查看</button>
+                                        <button class="btn btn-danger" onclick="deleteRecord(${record.id})">删除</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // 查看记录详情
+        function viewRecord(recordId) {
+            alert('查看记录 ID: ' + recordId);
+        }
+
+        // 删除记录
+        async function deleteRecord(recordId) {
+            if (!confirm('确定要删除这条记录吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/user/metrics/${recordId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('删除成功！');
+                    loadProfile();
+                    loadHistory();
+                } else {
+                    alert('删除失败: ' + result.message);
+                }
+            } catch (error) {
+                alert('删除失败: ' + error.message);
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        // 加载指标变化对比
+        async function loadComparison() {
+            try {
+                const response = await fetch('/api/user/metrics');
+                const result = await response.json();
+                
+                if (result.success && result.data.length >= 2) {
+                    const records = result.data;
+                    const latest = records[0];
+                    const previous = records[1];
+                    
+                    displayComparison(latest, previous);
+                    document.getElementById('comparison-card').style.display = 'block';
+                    document.getElementById('ai-analysis-card').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('加载对比数据失败:', error);
+            }
+        }
+
+        // 显示指标变化对比
+        function displayComparison(latest, previous) {
+            const content = document.getElementById('comparison-content');
+            
+            // 定义需要对比的指标
+            const metrics = [
+                { key: '年龄', label: '年龄', unit: '' },
+                { key: '体重指数', label: 'BMI', unit: '' },
+                { key: '收缩压', label: '收缩压', unit: 'mmHg' },
+                { key: '舒张压', label: '舒张压', unit: 'mmHg' },
+                { key: '空腹血糖', label: '空腹血糖', unit: 'mmol/L' },
+                { key: '糖化血红蛋白', label: '糖化血红蛋白', unit: '%' },
+                { key: '总胆固醇', label: '总胆固醇', unit: 'mmol/L' },
+                { key: '甘油三酯', label: '甘油三酯', unit: 'mmol/L' },
+                { key: '低密度脂蛋白胆固醇', label: 'LDL', unit: 'mmol/L' },
+                { key: '高密度脂蛋白胆固醇', label: 'HDL', unit: 'mmol/L' },
+                { key: '血清肌酐', label: '血清肌酐', unit: '' },
+                { key: '每周体育活动时间', label: '运动时间', unit: '小时' },
+                { key: '饮食质量', label: '饮食质量', unit: '' },
+                { key: '睡眠质量', label: '睡眠质量', unit: '' },
+                { key: '疲劳程度', label: '疲劳程度', unit: '' },
+                { key: '生活质量评分', label: '生活质量', unit: '' }
+            ];
+
+            // 计算变化
+            const changes = metrics.map(m => {
+                const oldValue = previous[m.key];
+                const newValue = latest[m.key];
+                
+                if (oldValue === undefined || newValue === undefined || 
+                    oldValue === null || newValue === null || oldValue === '--' || newValue === '--') {
+                    return null;
+                }
+                
+                const diff = parseFloat(newValue) - parseFloat(oldValue);
+                const percentage = oldValue != 0 ? (diff / parseFloat(oldValue)) * 100 : 0;
+                
+                return {
+                    ...m,
+                    oldValue: parseFloat(oldValue),
+                    newValue: parseFloat(newValue),
+                    diff,
+                    percentage,
+                    absPercentage: Math.abs(percentage)
+                };
+            }).filter(c => c !== null);
+
+            // 按变化幅度排序，取最大的5个
+            const topChanges = [...changes].sort((a, b) => b.absPercentage - a.absPercentage).slice(0, 5);
+
+            // 生成HTML
+            let html = `
+                <div class="top-changes">
+                    <h3>🏆 变化最大的5个指标</h3>
+                    ${topChanges.map(c => `
+                        <div class="top-change-item">
+                            <span class="top-change-name">${c.label}</span>
+                            <span class="top-change-value" style="color: ${c.diff >= 0 ? '#28a745' : '#dc3545'}">
+                                ${c.diff >= 0 ? '↑' : '↓'} ${Math.abs(c.percentage).toFixed(1)}%
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="comparison-grid">
+                    ${changes.map(c => {
+                        const trend = c.diff > 0 ? 'up' : c.diff < 0 ? 'down' : 'same';
+                        const cardClass = c.diff > 0 ? 'positive' : c.diff < 0 ? 'negative' : 'neutral';
+                        const isBadMetric = ['收缩压', '舒张压', '空腹血糖', '糖化血红蛋白', '总胆固醇', '甘油三酯', '低密度脂蛋白胆固醇', '血清肌酐', '疲劳程度'].includes(c.label);
+                        const isGoodChange = isBadMetric ? c.diff < 0 : c.diff > 0;
+                        const displayClass = isGoodChange ? 'positive' : c.diff !== 0 ? 'negative' : 'neutral';
+                        
+                        return `
+                            <div class="change-card ${displayClass}">
+                                <div class="change-header">
+                                    <span class="change-label">${c.label}</span>
+                                    <span class="change-badge ${trend}">${c.diff >= 0 ? '上升' : c.diff < 0 ? '下降' : '不变'}</span>
+                                </div>
+                                <div class="change-values">
+                                    <span class="change-value old">${c.oldValue.toFixed(1)}${c.unit ? ' ' + c.unit : ''}</span>
+                                    <span class="change-value new">${c.newValue.toFixed(1)}${c.unit ? ' ' + c.unit : ''}</span>
+                                </div>
+                                <div class="change-percentage">
+                                    变化: ${c.diff >= 0 ? '+' : ''}${c.diff.toFixed(2)} (${c.percentage >= 0 ? '+' : ''}${c.percentage.toFixed(1)}%)
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            content.innerHTML = html;
+
+            // 保存变化数据供AI分析使用
+            window.changesData = {
+                latest,
+                previous,
+                changes,
+                topChanges
+            };
+        }
+
+        // 生成AI分析报告
+        async function generateAnalysis() {
+            if (!window.changesData) {
+                alert('请先加载对比数据');
+                return;
+            }
+
+            const content = document.getElementById('ai-analysis-content');
+            content.innerHTML = '<div class="ai-analysis"><div class="loading">正在生成分析报告...</div></div>';
+
+            try {
+                const response = await fetch('/api/user/analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(window.changesData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayAnalysis(result.analysis);
+                } else {
+                    content.innerHTML = `<div class="ai-analysis"><p style="color: #dc3545;">分析失败: ${result.message}</p></div>`;
+                }
+            } catch (error) {
+                content.innerHTML = `<div class="ai-analysis"><p style="color: #dc3545;">分析失败: ${error.message}</p></div>`;
+            }
+        }
+
+        // 显示AI分析报告
+        function displayAnalysis(analysis) {
+            const content = document.getElementById('ai-analysis-content');
+            
+            content.innerHTML = `
+                <div class="ai-analysis">
+                    ${analysis.overview ? `
+                        <div class="analysis-section">
+                            <h4>📋 总体评价</h4>
+                            <p>${analysis.overview}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${analysis.positiveChanges ? `
+                        <div class="analysis-section">
+                            <h4>✅ 正面变化</h4>
+                            <ul>
+                                ${analysis.positiveChanges.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${analysis.negativeChanges ? `
+                        <div class="analysis-section">
+                            <h4>⚠️ 需关注的变化</h4>
+                            <ul>
+                                ${analysis.negativeChanges.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${analysis.suggestions ? `
+                        <div class="analysis-section">
+                            <h4>💡 健康建议</h4>
+                            <ul>
+                                ${analysis.suggestions.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfile();
+            loadHistory();
+            loadComparison();
+        });
+    </script>
+</body>
+</html>

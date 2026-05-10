@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>测试预测功能</title>
+</head>
+<body>
+    <h1>测试预测功能</h1>
+    <button onclick="testPredict()">测试预测</button>
+    <div id="result"></div>
+
+    <script>
+        async function testPredict() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在测试...';
+
+            const testData = {
+                '年龄': 55,
+                '性别': 1,
+                '种族': 0,
+                '社会经济地位': 1,
+                '教育水平': 2,
+                '体重指数': 25.9,
+                '吸烟状态': 0,
+                '饮酒量': 10.0,
+                '每周体育活动时间': 5.0,
+                '饮食质量': 5.0,
+                '睡眠质量': 7.0,
+                '糖尿病家族史': 0,
+                '妊娠期糖尿病': 0,
+                '多囊卵巢综合征': 0,
+                '既往糖尿病前期': 0,
+                '高血压': 0,
+                '收缩压': 134,
+                '舒张压': 90,
+                '空腹血糖': 135.0,
+                '糖化血红蛋白': 7.0,
+                '血清肌酐': 2.8,
+                '血尿素氮水平': 28.0,
+                '总胆固醇': 225.0,
+                '低密度脂蛋白胆固醇': 125.0,
+                '高密度脂蛋白胆固醇': 60.0,
+                '甘油三酯': 227.0,
+                '降压药物使用': 0,
+                '他汀类药物使用': 0,
+                '抗糖尿病药物使用': 0,
+                '尿频': 0,
+                '过度口渴': 0,
+                '不明原因体重下降': 0,
+                '疲劳程度': 5.0,
+                '视力模糊': 0,
+                '伤口愈合缓慢': 0,
+                '手脚刺痛': 0,
+                '生活质量评分': 49.0,
+                '重金属暴露': 0,
+                '职业化学物质暴露': 0,
+                '水质': 1,
+                '体检频率': 2.0,
+                '药物依从性': 5.0,
+                '健康素养': 5.0
+            };
+
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <h2>预测结果:</h2>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<h2>错误:</h2><p>${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
