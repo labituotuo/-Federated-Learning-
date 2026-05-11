@@ -70,7 +70,7 @@ def save_federated_training_result(algorithm, encryption, privacy, num_clients, 
 
     # 合并加密方式和隐私保护为一列
     privacy_method = 'none'
-    if encryption == 'homomorphic' or encryption == 'paillier':
+    if encryption == 'homomorphic':
         privacy_method = 'homomorphic'
     elif privacy == 'differential' or encryption == 'differential_privacy':
         privacy_method = 'differential'

@@ -22,7 +22,7 @@ from pymysql.cursors import DictCursor
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from crypto_utils import HomomorphicCrypto, CKKSCrypto
+from crypto_utils import CKKSCrypto
 
 app = Flask(__name__)
 
@@ -609,12 +609,8 @@ def get_public_key():
     if crypto is None or crypto.public_key is None:
         return jsonify({'has_public_key': False})
 
-    if isinstance(crypto, CKKSCrypto):
-        encryption_type = 'ckks'
-        public_key_data = crypto.get_public_key_serialized()
-    else:
-        encryption_type = 'paillier'
-        public_key_data = crypto.get_public_key_dict()
+    encryption_type = 'ckks'
+    public_key_data = crypto.get_public_key_serialized()
 
     return jsonify({
         'has_public_key': True,
@@ -840,11 +836,6 @@ def aggregate():
                         aggregated_state[key] = torch.tensor(corrected / total_samples, dtype=template_state[key].dtype)
                         
                         log(f'[加密] CKKS 加权聚合完成: {key}')
-                    elif isinstance(encrypted_tensors[0], list):
-                        # Paillier: 使用原始的聚合方法
-                        aggregated = crypto.aggregate_encrypted(encrypted_tensors, weights)
-                        decrypted = crypto.decrypt_tensor(aggregated, template_state[key].shape)
-                        aggregated_state[key] = torch.tensor(decrypted, dtype=template_state[key].dtype)
                     else:
                         for i, (enc_tensor, weight) in enumerate(zip(encrypted_tensors, weights)):
                             if i == 0:

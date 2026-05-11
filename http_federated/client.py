@@ -19,7 +19,7 @@ from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from crypto_utils import HomomorphicCrypto, CKKSCrypto
+from crypto_utils import CKKSCrypto
 
 if len(sys.argv) < 3:
     print('Usage: python client.py <client_id> <port>')
@@ -402,17 +402,12 @@ def start_train():
         if key_response.status_code == 200:
             key_data = key_response.json()
             if key_data.get('has_public_key'):
-                encryption_type = key_data.get('encryption_type', 'paillier')
+                encryption_type = key_data.get('encryption_type', 'ckks')
                 log(f'[加密] 收到服务器公钥 (类型: {encryption_type})，开始初始化...')
 
-                if encryption_type == 'ckks':
-                    client_state['crypto'] = CKKSCrypto()
-                    client_state['crypto'].load_public_key_from_serialized(key_data['public_key'])
-                    log('[加密] CKKS同态加密已初始化')
-                else:
-                    client_state['crypto'] = HomomorphicCrypto()
-                    client_state['crypto'].load_public_key_from_dict(key_data['public_key'])
-                    log('[加密] Paillier同态加密已初始化')
+                client_state['crypto'] = CKKSCrypto()
+                client_state['crypto'].load_public_key_from_serialized(key_data['public_key'])
+                log('[加密] CKKS同态加密已初始化')
 
                 client_state['encryption'] = 'homomorphic'
             else:

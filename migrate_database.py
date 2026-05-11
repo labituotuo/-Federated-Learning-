@@ -61,7 +61,7 @@ def migrate_database():
                 cursor.execute("""
                     UPDATE training_results 
                     SET 隐私保护方式 = CASE
-                        WHEN 加密方式 = 'homomorphic' OR 加密方式 = 'paillier' THEN 'homomorphic'
+                        WHEN 加密方式 = 'homomorphic' THEN 'homomorphic'
                         WHEN 隐私保护 = 'differential' THEN 'differential'
                         ELSE 'none'
                     END
